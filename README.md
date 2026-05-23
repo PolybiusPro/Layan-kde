@@ -8,12 +8,23 @@ In this repository you'll find:
 - Plasma Color Schemes
 - Plasma Desktop Themes
 - Plasma Look-and-Feel Themes
+- Konsole color schemes and translucent profiles (matching Dolphin)
 
 ## Installation
 
 ```sh
-./install.sh
+# Install for your user (recommended)
+./install.sh --apply
+
+# Install system-wide for all users
+sudo ./install.sh --system --apply
 ```
+
+`--apply` activates the Layan global theme (look-and-feel) after files are installed.
+Use `--apply-light` for the light variant.
+
+In Konsole, choose the **Layan** or **LayanLight** profile under Settings → Profiles.
+Both use blurred transparency and the same purple accent (`#5657f5`) as Dolphin.
 
 ## Uninstallation
 

@@ -9,6 +9,10 @@ Theme=Tela-circle
 
 [kdeglobals][KDE]
 widgetStyle=kvantum
+LookAndFeelPackage=com.github.vinceliuice.Layan-light
+DefaultDarkLookAndFeel=com.github.vinceliuice.Layan
+DefaultLightLookAndFeel=com.github.vinceliuice.Layan-light
+AutomaticLookAndFeel=false
 
 [kwinrc][DesktopSwitcher]
 LayoutName=org.kde.breeze.desktop

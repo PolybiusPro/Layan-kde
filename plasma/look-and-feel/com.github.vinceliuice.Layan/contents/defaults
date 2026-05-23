@@ -5,10 +5,14 @@ cursorTheme=Layan-white-cursors
 ColorScheme=Layan
 
 [kdeglobals][Icons]
-Theme=Tela
+Theme=Tela-dark
 
 [kdeglobals][KDE]
 widgetStyle=kvantum-dark
+LookAndFeelPackage=com.github.vinceliuice.Layan
+DefaultDarkLookAndFeel=com.github.vinceliuice.Layan
+DefaultLightLookAndFeel=com.github.vinceliuice.Layan-light
+AutomaticLookAndFeel=false
 
 [kwinrc][DesktopSwitcher]
 LayoutName=org.kde.breeze.desktop

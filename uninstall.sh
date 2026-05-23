@@ -3,7 +3,7 @@
 ROOT_UID=0
 
 # Destination directory
-if [ "$UID" -eq "$ROOT_UID" ]; then
+if [ "$EUID" -eq "$ROOT_UID" ]; then
   AURORAE_DIR="/usr/share/aurorae/themes"
   SCHEMES_DIR="/usr/share/color-schemes"
   PLASMA_DIR="/usr/share/plasma/desktoptheme"
@@ -11,6 +11,7 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
   LOOKFEEL_DIR="/usr/share/plasma/look-and-feel"
   KVANTUM_DIR="/usr/share/Kvantum"
   WALLPAPER_DIR="/usr/share/wallpapers"
+  KONSOLE_DIR="/usr/share/konsole"
 else
   AURORAE_DIR="$HOME/.local/share/aurorae/themes"
   SCHEMES_DIR="$HOME/.local/share/color-schemes"
@@ -19,6 +20,7 @@ else
   LOOKFEEL_DIR="$HOME/.local/share/plasma/look-and-feel"
   KVANTUM_DIR="$HOME/.config/Kvantum"
   WALLPAPER_DIR="$HOME/.local/share/wallpapers"
+  KONSOLE_DIR="$HOME/.local/share/konsole"
 fi
 
 SRC_DIR=$(cd $(dirname $0) && pwd)
@@ -45,5 +47,12 @@ echo "Uninstalling '${THEME_NAME} kde themes'..."
 for color in "${colors[@]:-${COLOR_VARIANTS[@]}}"; do
   uninstall "${name:-${THEME_NAME}}" "${color}"
 done
+
+rm -fv "${KONSOLE_DIR}/Layan.colorscheme" \
+      "${KONSOLE_DIR}/LayanLight.colorscheme" \
+      "${KONSOLE_DIR}/Layan.profile" \
+      "${KONSOLE_DIR}/LayanLight.profile" \
+      "${KONSOLE_DIR}/Layan.colors" \
+      "${KONSOLE_DIR}/LayanLight.colors" 2>/dev/null || true
 
 echo "Uninstall finished..."

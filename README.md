@@ -49,8 +49,6 @@ Both use blurred transparency and the same purple accent (`#5657f5`) as Dolphin.
 
 ![Layan dark](plasma/look-and-feel/com.github.vinceliuice.Layan/contents/previews/fullscreenpreview.jpg)
 
-![Layan light](plasma/look-and-feel/com.github.vinceliuice.Layan-light/contents/previews/fullscreenpreview.jpg)
-
 ## Donate
 
 If you like this theme, please support the original author on the upstream project:

@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="logo.png" alt="Layan logo" width="128" />
+</p>
+
+# Layan KDE
 
 Layan kde is a flat Design theme for KDE Plasma desktop.
 
@@ -40,6 +45,12 @@ Both use blurred transparency and the same purple accent (`#5657f5`) as Dolphin.
 
 - Install [Tela icon theme](https://github.com/vinceliuice/Tela-icon-theme) for a more consistent and beautiful experience.
 
+## Preview
+
+![Layan dark](plasma/look-and-feel/com.github.vinceliuice.Layan/contents/previews/fullscreenpreview.jpg)
+
+![Layan light](plasma/look-and-feel/com.github.vinceliuice.Layan-light/contents/previews/fullscreenpreview.jpg)
+
 ## Donate
 
 If you like my project, you can donate at:
@@ -49,7 +60,3 @@ If you like my project, you can donate at:
 ## License
 
 GNU GPL v3
-
-## preview
-
-![1](../master/plasma/look-and-feel/com.github.vinceliuice.Layan/contents/previews/fullscreenpreview.jpg)

@@ -191,7 +191,7 @@
            transform="translate(-81.0002,-967)">
           <path
              id="path6276-2"
-             style="opacity:0.75;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+             style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
              d="m 87.799705,972 h 3.381737 c 0.450297,0 0.816227,0.36847 0.818758,0.8188 v 3.3817 z m 2.407413,6.00692 H 86.81204 c -0.450346,0 -0.818758,-0.36842 -0.818758,-0.81875 v -3.39509 l 4.213836,4.21384"
              inkscape:connector-curvature="0"
              sodipodi:nodetypes="csscccsscc" />

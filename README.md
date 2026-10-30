@@ -23,7 +23,8 @@ sudo ./install.sh --apply
 ```
 
 The installer only runs as root and installs system-wide under `/usr/share`, so every user and
-the login screen can use the theme.
+the login screen can use the theme. The exception is the Aurorae window decoration, which is
+installed into the invoking user's `~/.local/share/aurorae/themes`.
 
 `--apply` activates the Layan global theme (look-and-feel) for the user who ran `sudo` after
 files are installed. Use `--apply-light` for the light variant.

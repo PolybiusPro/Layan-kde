@@ -43,7 +43,7 @@ if [[ "$EUID" -ne "$ROOT_UID" ]]; then
   exit 1
 fi
 
-AURORAE_DIR="/usr/share/aurorae/themes"
+AURORAE_SYSTEM_DIR="/usr/share/aurorae/themes"
 SCHEMES_DIR="/usr/share/color-schemes"
 PLASMA_DIR="/usr/share/plasma/desktoptheme"
 LOOKFEEL_DIR="/usr/share/plasma/look-and-feel"
@@ -55,23 +55,24 @@ ICONS_DIR="/usr/share/icons"
 # The user who ran sudo, if any. Per-user steps (cache rebuild, applying the
 # global theme) must run as them, not as root.
 TARGET_USER=""
+TARGET_HOME=""
 if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != root ]]; then
   TARGET_USER=$SUDO_USER
+  TARGET_HOME=$(getent passwd "$TARGET_USER" | cut -d: -f6)
 fi
 
 run_as_target_user() {
-  local uid home
+  local uid
   uid=$(id -u "$TARGET_USER")
-  home=$(getent passwd "$TARGET_USER" | cut -d: -f6)
   runuser -u "$TARGET_USER" -- env \
-    HOME="$home" \
+    HOME="$TARGET_HOME" \
     XDG_RUNTIME_DIR="/run/user/${uid}" \
     DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${uid}/bus" \
     QT_QPA_PLATFORM=offscreen \
     "$@"
 }
 
-mkdir -p "${AURORAE_DIR}" "${SCHEMES_DIR}" "${PLASMA_DIR}" "${LOOKFEEL_DIR}" "${KVANTUM_DIR}" "${WALLPAPER_DIR}" "${KONSOLE_DIR}" "${ICONS_DIR}"
+mkdir -p "${SCHEMES_DIR}" "${PLASMA_DIR}" "${LOOKFEEL_DIR}" "${KVANTUM_DIR}" "${WALLPAPER_DIR}" "${KONSOLE_DIR}" "${ICONS_DIR}"
 
 install() {
   local name=${1}
@@ -82,14 +83,12 @@ install() {
 
   echo "Installing ${name}${color}..."
 
-  [[ -d ${AURORAE_DIR}/${name}${color} ]] && rm -rf ${AURORAE_DIR}/${name}*
   [[ -d ${PLASMA_DIR}/${name}${color} ]] && rm -rf ${PLASMA_DIR}/${name}${color}
   [[ -f ${SCHEMES_DIR}/${name}${else_color}.colors ]] && rm -f ${SCHEMES_DIR}/${name}${else_color}.colors
   [[ -d ${LOOKFEEL_DIR}/com.github.vinceliuice.${name}${color} ]] && rm -rf ${LOOKFEEL_DIR}/com.github.vinceliuice.${name}${color}
   [[ -d ${KVANTUM_DIR}/${name} ]] && rm -rf ${KVANTUM_DIR}/${name}*
   [[ -d ${WALLPAPER_DIR}/${name}${color} ]] && rm -rf ${WALLPAPER_DIR}/${name}${color}
 
-  cp -rf "${SRC_DIR}/aurorae/themes/${name}"*                                           "${AURORAE_DIR}/"
   cp -rf "${SRC_DIR}/color-schemes/${name}${else_color}.colors"                         "${SCHEMES_DIR}/"
   cp -rf "${SRC_DIR}/Kvantum/${name}"*                                                  "${KVANTUM_DIR}/"
   mkdir -p "${PLASMA_DIR}/${name}${color}"
@@ -106,6 +105,27 @@ echo "Global theme packages will be installed to: ${LOOKFEEL_DIR}"
 for color in "${colors[@]:-${COLOR_VARIANTS[@]}}"; do
   install "${name:-${THEME_NAME}}" "${color}"
 done
+
+# Window decorations go in the invoking user's directory, not /usr/share. The
+# login screen has no windows, so it does not need them. Without a sudo user
+# there is no home to install into, so fall back to the system directory.
+if [[ -n "$TARGET_USER" ]]; then
+  AURORAE_DIR="${TARGET_HOME}/.local/share/aurorae/themes"
+  echo "Installing Aurorae themes for ${TARGET_USER} to ${AURORAE_DIR}..."
+  run_as_target_user mkdir -p "${AURORAE_DIR}"
+  for aurorae_src in "${SRC_DIR}/aurorae/themes/${THEME_NAME}"*; do
+    aurorae_name=$(basename "${aurorae_src}")
+    run_as_target_user rm -rf "${AURORAE_DIR}/${aurorae_name}"
+    run_as_target_user cp -rf "${aurorae_src}" "${AURORAE_DIR}/"
+    # Drop a copy left by an earlier system-wide install so it is not listed twice
+    rm -rf "${AURORAE_SYSTEM_DIR:?}/${aurorae_name}"
+  done
+else
+  AURORAE_DIR="${AURORAE_SYSTEM_DIR}"
+  echo "Not run through sudo, so Aurorae themes are installed system-wide to ${AURORAE_DIR}..."
+  mkdir -p "${AURORAE_DIR}"
+  cp -rf "${SRC_DIR}/aurorae/themes/${THEME_NAME}"* "${AURORAE_DIR}/"
+fi
 
 echo "Installing layan cursors (dark, light and darker)..."
 for cursor_theme in layan-dark-cursors layan-light-cursors layan-darker-cursors; do

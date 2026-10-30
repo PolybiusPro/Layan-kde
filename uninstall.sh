@@ -42,6 +42,12 @@ for color in "${colors[@]:-${COLOR_VARIANTS[@]}}"; do
   uninstall "${name:-${THEME_NAME}}" "${color}"
 done
 
+# The installer puts Aurorae themes in the invoking user's directory
+if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != root ]]; then
+  user_home=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+  rm -rfv "${user_home}/.local/share/aurorae/themes/${THEME_NAME}"*
+fi
+
 rm -rfv "${ICONS_DIR}/layan-dark-cursors" "${ICONS_DIR}/layan-light-cursors" "${ICONS_DIR}/layan-darker-cursors"
 
 rm -fv "${KONSOLE_DIR}/Layan.colorscheme" \

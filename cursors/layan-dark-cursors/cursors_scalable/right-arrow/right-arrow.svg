@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg11024" height="32" width="32">
+  <filter id="filter7078" color-interpolation-filters="sRGB">
+    <feGaussianBlur id="feGaussianBlur7080" stdDeviation=".657"/>
+  </filter>
+  <path id="path8364" d="m41.5 1001.406c-.373 0-.746.22-.906.563l-3.028 6.054a.85.85 0 0 0 -.076.383 1 1 0 0 0 1 1h1.51v10.5a1.5 1.5 0 0 0 3 0v-10.5h1.51a1 1 0 0 0 1-1 .85.85 0 0 0 -.076-.383l-3.028-6.054a1.01 1.01 0 0 0 -.906-.563" filter="url(#filter7078)" opacity=".2" transform="matrix(0 1 -1 0 1030.406 -25)"/>
+  <path d="M26.235 14.709L22.898 12.968A0.614 0.614 0 0 0 22 13.512L22 14.75L11 14.75C10.586 14.76 10.258 15.104 10.268 15.519C10.279 15.933 10.623 16.26 11.037 16.25L22 16.25L22 17.488A0.614 0.614 0 0 0 22.898 18.032L26.235 16.291A0.892 0.892 0 0 0 26.235 14.709Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+  <path id="path8368" d="M26.235 14.709L22.898 12.968A0.614 0.614 0 0 0 22 13.512L22 14.75L11 14.75C10.586 14.76 10.258 15.104 10.268 15.519C10.279 15.933 10.623 16.26 11.037 16.25L22 16.25L22 17.488A0.614 0.614 0 0 0 22.898 18.032L26.235 16.291A0.892 0.892 0 0 0 26.235 14.709Z" fill="#5657f5"/>
+  <path id="hotspot" d="m-28.5-16.5h1v1h-1z" display="none" fill="#333" stroke-width="1.07568" transform="scale(-1)"/>
+</svg>

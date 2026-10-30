@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg11024" height="32" width="32">
+  <filter id="filter7078" color-interpolation-filters="sRGB">
+    <feGaussianBlur id="feGaussianBlur7080" stdDeviation=".657"/>
+  </filter>
+  <path id="path11402" filter="url(#filter7078)" opacity=".2" d="M4.306 5.453L4.306 17.491A0.892 0.892 0 0 0 5.741 18.197L7.452 16.882A0.892 0.892 0 0 1 8.82 17.247L10.757 21.923A1.167 1.167 0 0 0 12.282 22.555L12.282 22.555A1.167 1.167 0 0 0 12.913 21.03L10.976 16.354A0.892 0.892 0 0 1 11.685 15.129L13.825 14.849A0.892 0.892 0 0 0 14.34 13.334L5.828 4.823A0.892 0.892 0 0 0 4.306 5.453Z" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+  <path id="path11404" d="M4 4.714L4 16.751A0.892 0.892 0 0 0 5.435 17.458L7.146 16.143A0.892 0.892 0 0 1 8.514 16.508L10.45 21.184A1.167 1.167 0 0 0 11.975 21.816L11.975 21.816A1.167 1.167 0 0 0 12.607 20.291L10.67 15.615A0.892 0.892 0 0 1 11.378 14.39L13.519 14.11A0.892 0.892 0 0 0 14.034 12.595L5.522 4.084A0.892 0.892 0 0 0 4 4.714Z" fill="#5657f5" stroke="#5657f5" stroke-width="2" stroke-linejoin="round"/>
+  <path id="path1347" d="M4 4.714L4 16.751A0.892 0.892 0 0 0 5.435 17.458L7.146 16.143A0.892 0.892 0 0 1 8.514 16.508L10.45 21.184A1.167 1.167 0 0 0 11.975 21.816L11.975 21.816A1.167 1.167 0 0 0 12.607 20.291L10.67 15.615A0.892 0.892 0 0 1 11.378 14.39L13.519 14.11A0.892 0.892 0 0 0 14.034 12.595L5.522 4.084A0.892 0.892 0 0 0 4 4.714Z" fill="#fff"/>
+  <g id="badge" transform="translate(19.6 22.5) scale(0.7862) translate(-20.5 -22.5)"><circle cx="20.5" cy="23.5" r="6.5" filter="url(#filter7078)" opacity=".2"/><circle cx="20.5" cy="22.5" r="6.5" fill="#5657f5"/><circle cx="20.5" cy="22.5" r="5.5" fill="#fff"/><path id="path5285" d="m7 8v2h3.63l-2-2zm0 3v2h6.63l-2-2zm0 3v2h6.115l2.686-.832-1.168-1.168z" fill="#5657f5" transform="translate(20.5 22.5) scale(.8) translate(-10.3 -12.5)"/>
+  </g><path id="hotspot" d="m4-5h1v1h-1z" display="none" fill="#333" stroke-width="1.07568" transform="rotate(90)"/>
+</svg>

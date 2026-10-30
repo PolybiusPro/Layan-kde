@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg11024" height="32" width="32">
+  <filter id="filter7078" color-interpolation-filters="sRGB">
+    <feGaussianBlur id="feGaussianBlur7080" stdDeviation=".657"/>
+  </filter>
+  <g id="g42397" transform="translate(-34.025 -1076.324)">
+    <path id="path42387" d="m50.025 1081.337c-6.075 0-11 4.925-11 11s4.925 11 11 11 11-4.925 11-11-4.925-11-11-11" filter="url(#filter7078)" opacity=".2"/>
+    <g id="g42395" transform="translate(-459.975 293.962)">
+      <circle id="circle42389" cx="510.00009" cy="797.361988" fill="#fff" r="11.00001"/>
+      <path d="M503.534 802.695 A8.38197 8.38197 0 0 1 502.868 792.959 A1.00584 1.00584 0 0 1 504.580 794.015 A6.37029 6.37029 0 0 0 505.086 801.415 A1.00584 1.00584 0 0 1 503.534 802.695Z" fill="#5657f5"/><path d="M517.852 800.295 A8.38197 8.38197 0 0 1 509.753 805.740 A1.00584 1.00584 0 0 1 509.812 803.730 A6.37029 6.37029 0 0 0 515.968 799.591 A1.00584 1.00584 0 0 1 517.852 800.295Z" fill="#0e9f6e"/><path d="M508.614 789.095 A8.38197 8.38197 0 0 1 517.380 793.387 A1.00584 1.00584 0 0 1 515.608 794.341 A6.37029 6.37029 0 0 0 508.947 791.079 A1.00584 1.00584 0 0 1 508.614 789.095Z" fill="#0d7ea0"/></g>
+  </g>
+  <path id="hotspot" d="m15-17h1v1h-1z" display="none" fill="#333" stroke-width="1.07568" transform="rotate(90)"/>
+</svg>

@@ -14,6 +14,7 @@ In this repository you'll find:
 - Plasma Desktop Themes
 - Plasma Look-and-Feel Themes
 - Konsole color schemes and translucent profiles (matching Dolphin)
+- layan-dark-cursors, layan-light-cursors and layan-darker-cursors (rounded, derived from Breeze Dark)
 
 ## Installation
 
@@ -30,6 +31,23 @@ Use `--apply-light` for the light variant.
 
 In Konsole, choose the **Layan** or **LayanLight** profile under Settings → Profiles.
 Both use blurred transparency and the same purple accent (`#5657f5`) as Dolphin.
+
+## Cursors
+
+`install.sh` installs three cursor themes (`cursors/`). Pick one under System Settings -> Cursors.
+
+- **layan-dark-cursors**: Breeze Dark recolored to the layan accent (`#5657f5`) with a white
+  outline. The arrow has Breeze's 45 degree tip and wingspan, a vertical left edge, mirror
+  symmetry about its own axis, and proportions taken from the golden ratio. The other cursors
+  have rounded corners and a 1 px outline of even thickness.
+- **layan-light-cursors**: the same shapes with the colors swapped (white body, accent
+  outline). Badges (help, copy, progress, ...) sit on a white disc with an accent ring.
+- **layan-darker-cursors**: the dark theme with the accent replaced by the dark window
+  background (`#31313a`, the Window color in `Layan.colors`), keeping the white outline. The
+  lighter tones (spinner, center dots) are the accent blue.
+
+`cursors/generate.py` rebuilds all three from an installed `breeze-cursors` (needs `rsvg-convert`,
+fontTools, Pillow, numpy and lxml). Based on Breeze by the KDE VDG (LGPL-2.1-or-later).
 
 ## Uninstallation
 

@@ -14,7 +14,7 @@ usage() {
 Usage: $(basename "$0") [OPTIONS]
 
 Install Layan KDE theme components (Plasma desktop theme, color scheme,
-look-and-feel / global theme, Konsole, Aurorae, Kvantum, wallpapers).
+look-and-feel / global theme, Konsole, Aurorae, Kvantum, cursors, wallpapers).
 
 Options:
   --system    Install for all users under /usr/share (requires root)
@@ -62,6 +62,7 @@ if [[ "$INSTALL_SCOPE" == "system" ]]; then
   KVANTUM_DIR="/usr/share/Kvantum"
   WALLPAPER_DIR="/usr/share/wallpapers"
   KONSOLE_DIR="/usr/share/konsole"
+  ICONS_DIR="/usr/share/icons"
 else
   AURORAE_DIR="${HOME}/.local/share/aurorae/themes"
   SCHEMES_DIR="${HOME}/.local/share/color-schemes"
@@ -70,9 +71,10 @@ else
   KVANTUM_DIR="${HOME}/.config/Kvantum"
   WALLPAPER_DIR="${HOME}/.local/share/wallpapers"
   KONSOLE_DIR="${HOME}/.local/share/konsole"
+  ICONS_DIR="${HOME}/.icons"  # Plasma does not list cursors from ~/.local/share/icons
 fi
 
-mkdir -p "${AURORAE_DIR}" "${SCHEMES_DIR}" "${PLASMA_DIR}" "${LOOKFEEL_DIR}" "${KVANTUM_DIR}" "${WALLPAPER_DIR}" "${KONSOLE_DIR}"
+mkdir -p "${AURORAE_DIR}" "${SCHEMES_DIR}" "${PLASMA_DIR}" "${LOOKFEEL_DIR}" "${KVANTUM_DIR}" "${WALLPAPER_DIR}" "${KONSOLE_DIR}" "${ICONS_DIR}"
 
 install() {
   local name=${1}
@@ -108,6 +110,12 @@ for color in "${colors[@]:-${COLOR_VARIANTS[@]}}"; do
   install "${name:-${THEME_NAME}}" "${color}"
 done
 
+echo "Installing layan cursors (dark, light and darker)..."
+for cursor_theme in layan-dark-cursors layan-light-cursors layan-darker-cursors; do
+  rm -rf "${ICONS_DIR}/${cursor_theme}"
+  cp -rf "${SRC_DIR}/cursors/${cursor_theme}" "${ICONS_DIR}/"
+done
+
 echo "Installing Konsole color schemes and profiles..."
 cp -rf "${SRC_DIR}/konsole/"* "${KONSOLE_DIR}/"
 
@@ -140,6 +148,10 @@ echo "Install finished."
 echo "Look-and-feel (Global Theme) packages:"
 echo "  ${LOOKFEEL_DIR}/com.github.vinceliuice.Layan"
 echo "  ${LOOKFEEL_DIR}/com.github.vinceliuice.Layan-light"
+echo "Cursors (System Settings -> Cursors -> layan-dark/light/darker-cursors):"
+echo "  ${ICONS_DIR}/layan-dark-cursors"
+echo "  ${ICONS_DIR}/layan-light-cursors"
+echo "  ${ICONS_DIR}/layan-darker-cursors"
 echo "Konsole (Settings -> Konsole -> Profiles -> Layan):"
 echo "  ${KONSOLE_DIR}/Layan.profile + Layan.colorscheme"
 echo "  ${KONSOLE_DIR}/LayanLight.profile + LayanLight.colorscheme"

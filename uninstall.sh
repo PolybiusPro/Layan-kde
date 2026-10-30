@@ -12,6 +12,7 @@ if [ "$EUID" -eq "$ROOT_UID" ]; then
   KVANTUM_DIR="/usr/share/Kvantum"
   WALLPAPER_DIR="/usr/share/wallpapers"
   KONSOLE_DIR="/usr/share/konsole"
+  ICONS_DIR="/usr/share/icons"
 else
   AURORAE_DIR="$HOME/.local/share/aurorae/themes"
   SCHEMES_DIR="$HOME/.local/share/color-schemes"
@@ -21,6 +22,7 @@ else
   KVANTUM_DIR="$HOME/.config/Kvantum"
   WALLPAPER_DIR="$HOME/.local/share/wallpapers"
   KONSOLE_DIR="$HOME/.local/share/konsole"
+  ICONS_DIR="$HOME/.icons"
 fi
 
 SRC_DIR=$(cd $(dirname $0) && pwd)
@@ -47,6 +49,8 @@ echo "Uninstalling '${THEME_NAME} kde themes'..."
 for color in "${colors[@]:-${COLOR_VARIANTS[@]}}"; do
   uninstall "${name:-${THEME_NAME}}" "${color}"
 done
+
+rm -rfv "${ICONS_DIR}/layan-dark-cursors" "${ICONS_DIR}/layan-light-cursors" "${ICONS_DIR}/layan-darker-cursors"
 
 rm -fv "${KONSOLE_DIR}/Layan.colorscheme" \
       "${KONSOLE_DIR}/LayanLight.colorscheme" \

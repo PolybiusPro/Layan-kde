@@ -2,28 +2,20 @@
 
 ROOT_UID=0
 
-# Destination directory
-if [ "$EUID" -eq "$ROOT_UID" ]; then
-  AURORAE_DIR="/usr/share/aurorae/themes"
-  SCHEMES_DIR="/usr/share/color-schemes"
-  PLASMA_DIR="/usr/share/plasma/desktoptheme"
-  LAYOUT_DIR="/usr/share/plasma/layout-templates"
-  LOOKFEEL_DIR="/usr/share/plasma/look-and-feel"
-  KVANTUM_DIR="/usr/share/Kvantum"
-  WALLPAPER_DIR="/usr/share/wallpapers"
-  KONSOLE_DIR="/usr/share/konsole"
-  ICONS_DIR="/usr/share/icons"
-else
-  AURORAE_DIR="$HOME/.local/share/aurorae/themes"
-  SCHEMES_DIR="$HOME/.local/share/color-schemes"
-  PLASMA_DIR="$HOME/.local/share/plasma/desktoptheme"
-  LAYOUT_DIR="$HOME/.local/share/plasma/layout-templates"
-  LOOKFEEL_DIR="$HOME/.local/share/plasma/look-and-feel"
-  KVANTUM_DIR="$HOME/.config/Kvantum"
-  WALLPAPER_DIR="$HOME/.local/share/wallpapers"
-  KONSOLE_DIR="$HOME/.local/share/konsole"
-  ICONS_DIR="$HOME/.icons"
+if [ "$EUID" -ne "$ROOT_UID" ]; then
+  echo "Error: the uninstaller must be run as root. Run: sudo $0" >&2
+  exit 1
 fi
+
+# Destination directory
+AURORAE_DIR="/usr/share/aurorae/themes"
+SCHEMES_DIR="/usr/share/color-schemes"
+PLASMA_DIR="/usr/share/plasma/desktoptheme"
+LOOKFEEL_DIR="/usr/share/plasma/look-and-feel"
+KVANTUM_DIR="/usr/share/Kvantum"
+WALLPAPER_DIR="/usr/share/wallpapers"
+KONSOLE_DIR="/usr/share/konsole"
+ICONS_DIR="/usr/share/icons"
 
 SRC_DIR=$(cd $(dirname $0) && pwd)
 

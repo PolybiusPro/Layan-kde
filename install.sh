@@ -7,34 +7,30 @@ SRC_DIR=$(cd "$(dirname "$0")" && pwd)
 THEME_NAME=Layan
 COLOR_VARIANTS=('' '-light')
 APPLY_THEME=""
-INSTALL_SCOPE=""
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [OPTIONS]
+Usage: sudo $(basename "$0") [OPTIONS]
 
 Install Layan KDE theme components (Plasma desktop theme, color scheme,
-look-and-feel / global theme, Konsole, Aurorae, Kvantum, cursors, wallpapers).
+look-and-feel / global theme, Konsole, Aurorae, Kvantum, cursors, wallpapers)
+for all users under /usr/share. Must be run as root, so the login screen
+(which runs as its own user) can see the theme too.
 
 Options:
-  --system    Install for all users under /usr/share (requires root)
-  --user      Install for the current user under ~/.local (default)
-  --apply     Activate the dark Layan global theme after installing
+  --apply     Activate the dark Layan global theme for the invoking user
   --apply-light
-              Activate the Layan-light global theme after installing
+              Activate the Layan-light global theme for the invoking user
   -h, --help  Show this help
 
 Examples:
-  ./install.sh
-  sudo ./install.sh --system
-  ./install.sh --apply
+  sudo ./install.sh
+  sudo ./install.sh --apply
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --system) INSTALL_SCOPE=system; shift ;;
-    --user) INSTALL_SCOPE=user; shift ;;
     --apply) APPLY_THEME=dark; shift ;;
     --apply-light) APPLY_THEME=light; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -42,37 +38,38 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$INSTALL_SCOPE" ]]; then
-  if [[ "$EUID" -eq "$ROOT_UID" ]]; then
-    INSTALL_SCOPE=system
-  else
-    INSTALL_SCOPE=user
-  fi
+if [[ "$EUID" -ne "$ROOT_UID" ]]; then
+  echo "Error: the installer must be run as root. Run: sudo $0" >&2
+  exit 1
 fi
 
-if [[ "$INSTALL_SCOPE" == "system" ]]; then
-  if [[ "$EUID" -ne "$ROOT_UID" ]]; then
-    echo "Error: system-wide install requires root. Run: sudo $0 --system" >&2
-    exit 1
-  fi
-  AURORAE_DIR="/usr/share/aurorae/themes"
-  SCHEMES_DIR="/usr/share/color-schemes"
-  PLASMA_DIR="/usr/share/plasma/desktoptheme"
-  LOOKFEEL_DIR="/usr/share/plasma/look-and-feel"
-  KVANTUM_DIR="/usr/share/Kvantum"
-  WALLPAPER_DIR="/usr/share/wallpapers"
-  KONSOLE_DIR="/usr/share/konsole"
-  ICONS_DIR="/usr/share/icons"
-else
-  AURORAE_DIR="${HOME}/.local/share/aurorae/themes"
-  SCHEMES_DIR="${HOME}/.local/share/color-schemes"
-  PLASMA_DIR="${HOME}/.local/share/plasma/desktoptheme"
-  LOOKFEEL_DIR="${HOME}/.local/share/plasma/look-and-feel"
-  KVANTUM_DIR="${HOME}/.config/Kvantum"
-  WALLPAPER_DIR="${HOME}/.local/share/wallpapers"
-  KONSOLE_DIR="${HOME}/.local/share/konsole"
-  ICONS_DIR="${HOME}/.icons"  # Plasma does not list cursors from ~/.local/share/icons
+AURORAE_DIR="/usr/share/aurorae/themes"
+SCHEMES_DIR="/usr/share/color-schemes"
+PLASMA_DIR="/usr/share/plasma/desktoptheme"
+LOOKFEEL_DIR="/usr/share/plasma/look-and-feel"
+KVANTUM_DIR="/usr/share/Kvantum"
+WALLPAPER_DIR="/usr/share/wallpapers"
+KONSOLE_DIR="/usr/share/konsole"
+ICONS_DIR="/usr/share/icons"
+
+# The user who ran sudo, if any. Per-user steps (cache rebuild, applying the
+# global theme) must run as them, not as root.
+TARGET_USER=""
+if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != root ]]; then
+  TARGET_USER=$SUDO_USER
 fi
+
+run_as_target_user() {
+  local uid home
+  uid=$(id -u "$TARGET_USER")
+  home=$(getent passwd "$TARGET_USER" | cut -d: -f6)
+  runuser -u "$TARGET_USER" -- env \
+    HOME="$home" \
+    XDG_RUNTIME_DIR="/run/user/${uid}" \
+    DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/${uid}/bus" \
+    QT_QPA_PLATFORM=offscreen \
+    "$@"
+}
 
 mkdir -p "${AURORAE_DIR}" "${SCHEMES_DIR}" "${PLASMA_DIR}" "${LOOKFEEL_DIR}" "${KVANTUM_DIR}" "${WALLPAPER_DIR}" "${KONSOLE_DIR}" "${ICONS_DIR}"
 
@@ -103,7 +100,7 @@ install() {
   cp -rf "${SRC_DIR}/wallpaper/${name}${color}"                                         "${WALLPAPER_DIR}/"
 }
 
-echo "Installing '${THEME_NAME}' KDE themes (${INSTALL_SCOPE}-wide)..."
+echo "Installing '${THEME_NAME}' KDE themes (system-wide)..."
 echo "Global theme packages will be installed to: ${LOOKFEEL_DIR}"
 
 for color in "${colors[@]:-${COLOR_VARIANTS[@]}}"; do
@@ -119,28 +116,27 @@ done
 echo "Installing Konsole color schemes and profiles..."
 cp -rf "${SRC_DIR}/konsole/"* "${KONSOLE_DIR}/"
 
-if command -v kbuildsycoca6 >/dev/null 2>&1; then
-  kbuildsycoca6 --noincremental >/dev/null 2>&1 || true
+if [[ -n "$TARGET_USER" ]] && command -v kbuildsycoca6 >/dev/null 2>&1; then
+  run_as_target_user kbuildsycoca6 --noincremental >/dev/null 2>&1 || true
 fi
 
 if [[ -n "$APPLY_THEME" ]]; then
-  if ! command -v plasma-apply-lookandfeel >/dev/null 2>&1; then
-    echo "Warning: plasma-apply-lookandfeel not found; global theme was installed but not activated." >&2
-  elif [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
-    echo "Global theme installed. Activate it after login with:"
-    if [[ "$APPLY_THEME" == "light" ]]; then
-      echo "  plasma-apply-lookandfeel -a com.github.vinceliuice.Layan-light"
-    else
-      echo "  plasma-apply-lookandfeel -a com.github.vinceliuice.Layan"
-    fi
+  if [[ "$APPLY_THEME" == "light" ]]; then
+    LOOKFEEL_ID=com.github.vinceliuice.Layan-light
   else
-    if [[ "$APPLY_THEME" == "light" ]]; then
-      plasma-apply-lookandfeel -a com.github.vinceliuice.Layan-light
-      echo "Applied global theme: com.github.vinceliuice.Layan-light"
-    else
-      plasma-apply-lookandfeel -a com.github.vinceliuice.Layan
-      echo "Applied global theme: com.github.vinceliuice.Layan"
-    fi
+    LOOKFEEL_ID=com.github.vinceliuice.Layan
+  fi
+
+  if [[ -z "$TARGET_USER" ]]; then
+    echo "Not run through sudo, so there is no user to apply the theme to. Activate it as your user with:"
+    echo "  plasma-apply-lookandfeel -a ${LOOKFEEL_ID}"
+  elif ! command -v plasma-apply-lookandfeel >/dev/null 2>&1; then
+    echo "Warning: plasma-apply-lookandfeel not found; global theme was installed but not activated." >&2
+  elif run_as_target_user plasma-apply-lookandfeel -a "${LOOKFEEL_ID}"; then
+    echo "Applied global theme for ${TARGET_USER}: ${LOOKFEEL_ID}"
+  else
+    echo "Warning: could not apply the global theme. Activate it as your user with:" >&2
+    echo "  plasma-apply-lookandfeel -a ${LOOKFEEL_ID}" >&2
   fi
 fi
 
@@ -156,20 +152,7 @@ echo "Konsole (Settings -> Konsole -> Profiles -> Layan):"
 echo "  ${KONSOLE_DIR}/Layan.profile + Layan.colorscheme"
 echo "  ${KONSOLE_DIR}/LayanLight.profile + LayanLight.colorscheme"
 
-if [[ "$INSTALL_SCOPE" == "user" && -d "/usr/share/plasma/look-and-feel/com.github.vinceliuice.Layan" ]]; then
-  echo "Warning: Layan is also installed under /usr/share. Duplicate Global Theme and"
-  echo "Splash entries can appear in System Settings. Use one install location only:"
-  echo "  sudo $0 --system    # system-wide (removes ~/.local look-and-feel duplicates)"
-  echo "  or: sudo rm -rf /usr/share/plasma/look-and-feel/com.github.vinceliuice.Layan*"
-fi
-
-if [[ "$INSTALL_SCOPE" == "system" ]]; then
-  rm -rf "${HOME}/.local/share/plasma/look-and-feel/com.github.vinceliuice.Layan" \
-         "${HOME}/.local/share/plasma/look-and-feel/com.github.vinceliuice.Layan-light"
-  echo "Removed user-local look-and-feel copies to avoid duplicate Settings entries."
-fi
-
 if [[ -z "$APPLY_THEME" ]]; then
-  echo "To activate the global theme now, run:"
+  echo "To activate the global theme now, run as your user:"
   echo "  plasma-apply-lookandfeel -a com.github.vinceliuice.Layan"
 fi

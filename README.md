@@ -19,15 +19,14 @@ In this repository you'll find:
 ## Installation
 
 ```sh
-# Install for your user (recommended)
-./install.sh --apply
-
-# Install system-wide for all users
-sudo ./install.sh --system --apply
+sudo ./install.sh --apply
 ```
 
-`--apply` activates the Layan global theme (look-and-feel) after files are installed.
-Use `--apply-light` for the light variant.
+The installer only runs as root and installs system-wide under `/usr/share`, so every user and
+the login screen can use the theme.
+
+`--apply` activates the Layan global theme (look-and-feel) for the user who ran `sudo` after
+files are installed. Use `--apply-light` for the light variant.
 
 In Konsole, choose the **Layan** or **LayanLight** profile under Settings → Profiles.
 Both use blurred transparency and the same purple accent (`#5657f5`) as Dolphin.
@@ -60,7 +59,7 @@ fontTools, Pillow, numpy and lxml). Based on Breeze by the KDE VDG (LGPL-2.1-or-
 ## Uninstallation
 
 ```sh
-./uninstall.sh
+sudo ./uninstall.sh
 ```
 
 ## Recommendations

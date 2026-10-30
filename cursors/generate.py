@@ -169,6 +169,58 @@ def arrow_path(dx, dy, shift=0.0):
     return rounded_polygon(pts, radii)
 
 
+# The small arrow in the side and corner resize cursors (top_side, top_left_corner,
+# ...) is the cursor arrow at a smaller scale: the same 45 degree tip, golden
+# head to tail and tail width, and the same corner radius. Scaled so it is as long
+# as Breeze's glyph is once rounded (8.465 px, tip to end of tail), and pointing
+# up with its tail end where Breeze's is, 1012.156, and centered on x = 40.5.
+GLYPH_LEN = 8.465
+GLYPH_X = 40.5
+GLYPH_BOTTOM = 1012.156
+GLYPH_SCALE = (GLYPH_LEN + R_TIP * (1 / math.sin(HALF_ANGLE) - 1)) / TAIL_U
+GLYPH_CURSORS = tuple(n + ".svg" for n in (
+    "top_side", "bottom_side", "left_side", "right_side",
+    "top_left_corner", "top_right_corner", "bottom_left_corner", "bottom_right_corner"))
+
+
+def glyph_path(dx=0.0, dy=0.0):
+    """The scaled arrow, pointing up, as path data; moved by (dx, dy)."""
+    k = GLYPH_SCALE
+    half = TAIL_HALF * k
+    top = GLYPH_BOTTOM - TAIL_U * k
+    sin_a = math.sin(HALF_ANGLE)
+    wing_v = WING * sin_a * k
+
+    def pt(u, v):
+        return GLYPH_X + dx + v, top + dy + u * k
+
+    # down the right side and back up the left, the order arrow_path uses
+    pts = [pt(0, 0), pt(WING_U, wing_v), pt(JUNCTION_U, half), pt(TAIL_U, half),
+           pt(TAIL_U, -half), pt(JUNCTION_U, -half), pt(WING_U, -wing_v)]
+    radii = [R_TIP, R_WING, R_JUNCTION, half, half, R_JUNCTION, R_WING]
+    return rounded_polygon(pts, radii)
+
+
+def replace_glyph(root):
+    """Swap Breeze's glyph for ours, in its shadow, outline and body layers."""
+    for el in root.iter("{%s}path" % SVG_NS):
+        d = el.get("d") or ""
+        if "l-3.027 6.054" in d:
+            if el.get("filter") is not None:
+                # the shadow is the outline shape moved by some offset, which
+                # differs on the rotated corner cursors; read it off its start
+                m = re.match(r"m([\d.]+) ([\d.]+)c", d)
+                el.set("d", glyph_path(float(m.group(1)) - 40.5, float(m.group(2)) - 1001.406))
+                el.set("stroke", "#000")
+            else:
+                el.set("d", glyph_path())
+                el.set("stroke", OUTLINE)
+            el.set("stroke-width", "%g" % OUTLINE_STROKE)
+            el.set("stroke-linejoin", "round")
+        elif "-3 5.75h2.25v3" in d:
+            el.set("d", glyph_path())
+
+
 def path_start(d):
     m = re.match(r"\s*m\s*(-?[\d.]+)[ ,]\s*(-?[\d.]+)", d)
     return (float(m.group(1)), float(m.group(2))) if m else None
@@ -680,6 +732,8 @@ def process_svg(src, dst):
         shrink(badge_elements(root, {el for el, _ in arrows}), BADGE_CENTER, BADGE_SLOT)
     elif os.path.basename(src) == "dnd-no-drop.svg":  # hand with a badge, no arrow
         shrink([el for el in root if el.get("id") == "g40166"], (30.0, 29.0), (30.0, 29.0))
+    if os.path.basename(src) in GLYPH_CURSORS:
+        replace_glyph(root)
     if not arrows and not os.path.basename(src).startswith(KEEP_BREEZE_SHAPES):
         round_corners(root, os.path.basename(src).startswith(CLOSE_OPEN_PATHS))
     if os.path.basename(src).startswith("wait-"):

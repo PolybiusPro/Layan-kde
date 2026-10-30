@@ -44,7 +44,15 @@ Both use blurred transparency and the same purple accent (`#5657f5`) as Dolphin.
   outline). Badges (help, copy, progress, ...) sit on a white disc with an accent ring.
 - **layan-darker-cursors**: the dark theme with the accent replaced by the dark window
   background (`#31313a`, the Window color in `Layan.colors`), keeping the white outline. The
-  lighter tones (spinner, center dots) are the accent blue.
+  center dots of the resize cursors are the accent blue.
+
+The busy spinners (wait and progress) are the same in all three themes: three round arcs in
+purple, green and teal, drawn from one geometry. Their fill follows the theme: accent in the
+dark theme, white in the light theme and `#31313a` in the darker theme, with each color
+adjusted to stay legible on it. The no-entry discs and the Wayland cursor are filled with grey
+(`#b4b4b4`) in the dark theme and `#31313a` in the darker theme. The X cursor uses the same two
+tones the other way round: a `#31313a` fill with grey arms in the dark theme, a grey fill with
+`#31313a` arms in the darker theme.
 
 `cursors/generate.py` rebuilds all three from an installed `breeze-cursors` (needs `rsvg-convert`,
 fontTools, Pillow, numpy and lxml). Based on Breeze by the KDE VDG (LGPL-2.1-or-later).

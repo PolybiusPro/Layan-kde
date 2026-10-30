@@ -655,6 +655,15 @@ def arc_band(cx, cy, r_in, r_out, centre_deg, sweep_deg):
                r_in, r_in, pt(r_in, a0), rc, rc, pt(r_out, a0)))
 
 
+def recolor_spinner(container, colors):
+    """Recolor the spinner arcs in container by the colors map; returns the arcs."""
+    arcs = [e for e in container.iter("{%s}path" % SVG_NS)
+            if e.get("fill") in SPIN_FILLS and e.get("filter") is None]
+    for arc in arcs:
+        arc.set("fill", colors[arc.get("fill")])
+    return set(arcs)
+
+
 def spinner_arcs(parent, before, cx, cy, r_in, r_out, frame):
     """Add the three arcs of one frame to parent, ahead of `before`."""
     lead = SPIN_START + frame * SPIN_STEP
@@ -814,6 +823,11 @@ def swap_colors(root, skip=()):
                 el.set(attr, swap[v.lower()])
 
 
+# The spinner on the light theme's white fill: the purple, green and teal of the other
+# themes at depths that hold their contrast on white (3.9:1, 3.4:1 and 4.7:1).
+LIGHT_SPIN = {PRIMARY: "#b74aff", SPIN_GREEN: SPIN_GREEN, SPIN_TEAL: SPIN_TEAL}
+
+
 def make_light_svg(src, dst):
     tree = etree.parse(src)
     root = tree.getroot()
@@ -822,11 +836,15 @@ def make_light_svg(src, dst):
     disc = next((r for k, r in DISC_CURSORS.items() if name.startswith(k)), None)
     if disc:
         lighten_disc(root, disc)
+        if name.startswith("wait-"):
+            recolor_spinner(root, LIGHT_SPIN)
         skip.add(root)
         skip.update(root.iter())
     else:
         for badge in [e for e in root.iter() if e.get("id") == "badge"]:
             lighten_disc(badge, BADGE_RADIUS)
+            if name.startswith("progress-"):
+                recolor_spinner(badge, LIGHT_SPIN)
             skip.add(badge)
     for prefix, ids in KEEP_COLOR_IDS.items():
         if name.startswith(prefix):
@@ -863,13 +881,13 @@ DARKER_BG = "#31313a"
 DARKER_MAP = {PRIMARY: DARKER_BG, PRIMARY_TINT: PRIMARY, PRIMARY_TINT2: PRIMARY_TINT}
 
 
-# The same three hues on the dark fill, lightened to keep their contrast: the
-# green of the alias badge and a lighter teal. The accent lead stays as it is.
-DARKER_SPIN = {PRIMARY: PRIMARY, SPIN_GREEN: "#18c087", SPIN_TEAL: "#30bde8"}
+# The same three hues on the dark fill, lightened to keep their contrast: a vivid
+# purple (Layan's #b74aff lightened), mint and sky blue, 4.5:1 or better.
+DARKER_SPIN = {PRIMARY: "#d66bff", SPIN_GREEN: "#5ef2b4", SPIN_TEAL: "#4fd0ff"}
 
 
-def darken_disc(container, radius):
-    """Give a white disc a dark fill, keeping the white as its outline. False if there is none."""
+def darken_disc(container, radius, fill=DARKER_BG):
+    """Give a white disc a new fill, keeping the white as its outline. False if there is none."""
     ring = next((e for e in container.iter("{%s}circle" % SVG_NS) if e.get("fill") == OUTLINE), None)
     if ring is None:
         return False
@@ -877,21 +895,53 @@ def darken_disc(container, radius):
     if "id" in inner.attrib:
         del inner.attrib["id"]
     inner.set("r", "%.6g" % (float(ring.get("r")) * (radius - RING) / radius))
-    inner.set("fill", DARKER_BG)
+    inner.set("fill", fill)
     ring.addnext(inner)
     return True
 
 
-def darken_spinner(container, radius):
-    """Dark-fill the spinner's disc and recolor its arcs for it; returns the arcs."""
-    if not darken_disc(container, radius):
+def darken_spinner(container, radius, fill=DARKER_BG, colors=DARKER_SPIN):
+    """Fill the spinner's disc and recolor its arcs for it; returns the arcs."""
+    if not darken_disc(container, radius, fill):
         return set()
-    held = set()
-    for arc in container.iter("{%s}path" % SVG_NS):
-        if arc.get("fill") in SPIN_FILLS and arc.get("filter") is None:
-            arc.set("fill", DARKER_SPIN[arc.get("fill")])
-            held.add(arc)
-    return held
+    return recolor_spinner(container, colors)
+
+
+LOGO_ORANGE = "#f67400"
+
+
+def fill_logo_disc(root, radius, fill):
+    """The Wayland disc: the orange gives way to a plain fill inside the white ring, the
+    white W staying."""
+    if not darken_disc(root, radius, fill):
+        return
+    for el in root.iter("{%s}circle" % SVG_NS):
+        if el.get("fill") == LOGO_ORANGE:
+            el.getparent().remove(el)
+
+
+def fill_x_logo(root, fill, arms):
+    """The X cursor: a plain fill inside a 1 px white border (a stroke clipped to the
+    silhouette, so the shape keeps its size), the arms in a second tone that stands
+    apart from both the border and the fill, and the orange ring."""
+    sil = next(e for e in root.iter("{%s}path" % SVG_NS) if e.get("fill") == OUTLINE and e.get("filter") is None)
+    clip = etree.Element("{%s}clipPath" % SVG_NS)
+    clip.set("id", "silhouette-clip")
+    cut = etree.SubElement(clip, "{%s}path" % SVG_NS)
+    cut.set("d", sil.get("d"))
+    border = copy.deepcopy(sil)
+    if "id" in border.attrib:
+        del border.attrib["id"]
+    border.set("fill", "none")
+    border.set("stroke", OUTLINE)
+    border.set("stroke-width", "%g" % OUTLINE_STROKE)
+    border.set("clip-path", "url(#silhouette-clip)")
+    for el in root.iter("{%s}path" % SVG_NS):
+        if el.get("fill") == PRIMARY and el.get("filter") is None:
+            el.set("fill", arms)
+    sil.set("fill", fill)
+    sil.addprevious(clip)
+    sil.addnext(border)
 
 
 # The center circle of the size_* cursors keeps the accent as its inner fill.
@@ -908,6 +958,10 @@ def make_darker_svg(src, dst):
         held = darken_spinner(root, DISC_CURSORS["wait"])
     for badge in [e for e in root.iter() if e.get("id") == "badge" and name.startswith("progress-")]:
         held |= darken_spinner(badge, BADGE_RADIUS)
+    if name.startswith("wayland-cursor"):
+        fill_logo_disc(root, DISC_CURSORS["wayland-cursor"], DARKER_BG)
+    if name.startswith("x-cursor"):
+        fill_x_logo(root, DARK_GREY_FILL, DARKER_BG)
     if name.startswith("not-allowed"):
         darken_disc(root, DISC_CURSORS["not-allowed"])
     for badge in [e for e in root.iter() if e.get("id") == "badge" and name.startswith(("no-drop", "dnd-no-drop"))]:
@@ -922,6 +976,55 @@ def make_darker_svg(src, dst):
             if v is not None and v.lower() in DARKER_MAP:
                 el.set(attr, DARKER_MAP[v.lower()])
     tree.write(dst, xml_declaration=False, encoding="utf-8")
+
+
+# The dark theme's spinners sit on the accent instead of white, with a white ring
+# like the other themes. The lead arc turns a vivid purple, Layan's #b74aff lightened
+# (1.3:1 on the accent as is, 1.8:1 here), and the green and teal are lightened to
+# 3.6:1 and 2.9:1 so all three arcs still read on it.
+DARK_SPIN = DARKER_SPIN
+
+
+# The no-entry disc (not-allowed and the no-drop badges), the Wayland disc and the X
+# are filled with a mid grey (ForegroundInactive in LayanLight.colors). Behind the red
+# ring and slash that is 2.2:1.
+DARK_GREY_FILL = "#b4b4b4"
+
+
+def stage_dark_fills(dark):
+    """Refill the dark theme's spinners and no-entry discs, in place.
+    Runs after the light and darker themes are derived from these files, which must
+    keep the white."""
+    for name in sorted(os.listdir(dark)):
+        folder = os.path.join(dark, name)
+        if os.path.islink(folder):
+            continue
+        for f in sorted(os.listdir(folder)):
+            if not f.endswith(".svg"):
+                continue
+            wait, progress = f.startswith("wait-"), f.startswith("progress-")
+            logo = f in ("wayland-cursor.svg", "x-cursor.svg")
+            disc = f == "not-allowed.svg"
+            badge_disc = f in ("no-drop.svg", "dnd-no-drop.svg")
+            if not (wait or progress or disc or badge_disc or logo):
+                continue
+            path = os.path.join(folder, f)
+            tree = etree.parse(path)
+            root = tree.getroot()
+            if wait:
+                darken_spinner(root, DISC_CURSORS["wait"], PRIMARY, DARK_SPIN)
+            if f == "wayland-cursor.svg":
+                fill_logo_disc(root, DISC_CURSORS["wayland-cursor"], DARK_GREY_FILL)
+            if f == "x-cursor.svg":
+                fill_x_logo(root, DARKER_BG, DARK_GREY_FILL)
+            if disc:
+                darken_disc(root, DISC_CURSORS["not-allowed"], DARK_GREY_FILL)
+            for badge in [e for e in root.iter() if e.get("id") == "badge"]:
+                if progress:
+                    darken_spinner(badge, BADGE_RADIUS, PRIMARY, DARK_SPIN)
+                elif badge_disc:
+                    darken_disc(badge, BADGE_RADIUS, DARK_GREY_FILL)
+            tree.write(path, xml_declaration=False, encoding="utf-8")
 
 
 def stage_darker(dark, out):
@@ -1024,13 +1127,14 @@ def main():
     if not os.path.isdir(os.path.join(args.breeze, "cursors_scalable")):
         sys.exit("no scalable Breeze cursors under %s" % args.breeze)
     dark = os.path.join(DARK_DIR, "cursors_scalable")
-    build(DARK_DIR, "layan-dark-cursors", "layan accent dark cursors",
-          lambda out: stage_scalable(args.breeze, out))
-    # the other two are derived from the dark SVGs
+    stage_scalable(args.breeze, dark)
+    # the other two are derived from the dark SVGs, before its spinners are refilled
     build(LIGHT_DIR, "layan-light-cursors", "layan accent light cursors",
           lambda out: stage_light(dark, out))
     build(DARKER_DIR, "layan-darker-cursors", "layan darker cursors in the dark window background color",
           lambda out: stage_darker(dark, out))
+    stage_dark_fills(dark)
+    build(DARK_DIR, "layan-dark-cursors", "layan accent dark cursors", lambda out: None)
 
 
 if __name__ == "__main__":

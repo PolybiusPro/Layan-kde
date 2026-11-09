@@ -84,11 +84,11 @@ install() {
 
   echo "Installing ${name}${color}..."
 
-  [[ -d ${PLASMA_DIR}/${name}${color} ]] && rm -rf ${PLASMA_DIR}/${name}${color}
-  [[ -f ${SCHEMES_DIR}/${name}${else_color}.colors ]] && rm -f ${SCHEMES_DIR}/${name}${else_color}.colors
-  [[ -d ${LOOKFEEL_DIR}/com.github.vinceliuice.${name}${color} ]] && rm -rf ${LOOKFEEL_DIR}/com.github.vinceliuice.${name}${color}
-  [[ -d ${KVANTUM_DIR}/${name} ]] && rm -rf ${KVANTUM_DIR}/${name}*
-  [[ -d ${WALLPAPER_DIR}/${name}${color} ]] && rm -rf ${WALLPAPER_DIR}/${name}${color}
+  rm -rf "${PLASMA_DIR:?}/${name}${color}"
+  rm -f "${SCHEMES_DIR:?}/${name}${else_color}.colors"
+  rm -rf "${LOOKFEEL_DIR:?}/com.github.vinceliuice.${name}${color}"
+  rm -rf "${KVANTUM_DIR:?}/${name}"*
+  rm -rf "${WALLPAPER_DIR:?}/${name}${color}"
 
   cp -rf "${SRC_DIR}/color-schemes/${name}${else_color}.colors"                         "${SCHEMES_DIR}/"
   cp -rf "${SRC_DIR}/Kvantum/${name}"*                                                  "${KVANTUM_DIR}/"

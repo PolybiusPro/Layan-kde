@@ -16,6 +16,7 @@ KVANTUM_DIR="/usr/share/Kvantum"
 WALLPAPER_DIR="/usr/share/wallpapers"
 KONSOLE_DIR="/usr/share/konsole"
 ICONS_DIR="/usr/share/icons"
+GTK_THEMES_DIR="/usr/share/themes"
 
 SRC_DIR=$(cd $(dirname $0) && pwd)
 
@@ -46,7 +47,15 @@ done
 if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != root ]]; then
   user_home=$(getent passwd "$SUDO_USER" | cut -d: -f6)
   rm -rfv "${user_home}/.local/share/aurorae/themes/${THEME_NAME}"*
+
+  # Remove the libadwaita palette import that --apply added to the user's GTK 4 stylesheet
+  gtk4_css="${user_home}/.config/gtk-4.0/gtk.css"
+  if [[ -f "$gtk4_css" ]]; then
+    sed -i '\#/themes/Layan[^/]*/gtk-4.0/libadwaita.css#d' "$gtk4_css"
+  fi
 fi
+
+rm -rfv "${GTK_THEMES_DIR}/${THEME_NAME}" "${GTK_THEMES_DIR}/${THEME_NAME}-light"
 
 rm -rfv "${ICONS_DIR}/layan-dark-cursors" "${ICONS_DIR}/layan-light-cursors" "${ICONS_DIR}/layan-darker-cursors"
 

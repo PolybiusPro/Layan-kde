@@ -13,6 +13,7 @@ In this repository you'll find:
 - Plasma Color Schemes
 - Plasma Desktop Themes
 - Plasma Look-and-Feel Themes
+- GTK 3 and GTK 4 themes (Layan and Layan-light), including libadwaita apps
 - Konsole color schemes and translucent profiles (matching Dolphin)
 - layan-dark-cursors, layan-light-cursors and layan-darker-cursors (rounded, derived from Breeze Dark)
 
@@ -26,11 +27,29 @@ The installer only runs as root and installs system-wide under `/usr/share`, so 
 the login screen can use the theme. The exception is the Aurorae window decoration, which is
 installed into the invoking user's `~/.local/share/aurorae/themes`.
 
-`--apply` activates the Layan global theme (look-and-feel) for the user who ran `sudo` after
-files are installed. Use `--apply-light` for the light variant.
+`--apply` activates the Layan global theme (look-and-feel) and the matching GTK theme for the user
+who ran `sudo` after files are installed. Use `--apply-light` for the light variant.
 
 In Konsole, choose the **Layan** or **LayanLight** profile under Settings → Profiles.
 Both use blurred transparency and the same purple accent (`#5657f5`) as Dolphin.
+
+## GTK applications
+
+`install.sh` installs the **Layan** and **Layan-light** GTK themes (`gtk/themes/`) to
+`/usr/share/themes`, and `--apply` selects the right one through kde-gtk-config. They cover GTK 3
+and GTK 4 apps. The palette comes from `Layan.colors` and `LayanLight.colors`, so GTK and Qt apps
+share the same colors.
+
+- The themes import Breeze-GTK and override its colors, so the `breeze-gtk` package must be
+  installed (kde-gtk-config already depends on it). Windows, menus, popovers and tooltips are
+  rounded on top of that.
+- libadwaita apps ignore the theme name. `--apply` adds an import of the Layan palette to
+  `~/.config/gtk-4.0/gtk.css` (`uninstall.sh` removes it again).
+- To pick a theme by hand, use System Settings -> Application Style -> Configure GNOME/GTK
+  Application Style.
+- GTK 2 is not themed.
+
+`gtk/generate.py` rebuilds the themes from the color schemes (python3 only).
 
 ## Cursors
 

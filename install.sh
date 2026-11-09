@@ -13,14 +13,14 @@ usage() {
 Usage: sudo $(basename "$0") [OPTIONS]
 
 Install Layan KDE theme components (Plasma desktop theme, color scheme,
-look-and-feel / global theme, Konsole, Aurorae, Kvantum, cursors, wallpapers)
+look-and-feel / global theme, Konsole, Aurorae, Kvantum, GTK, cursors, wallpapers)
 for all users under /usr/share. Must be run as root, so the login screen
 (which runs as its own user) can see the theme too.
 
 Options:
-  --apply     Activate the dark Layan global theme for the invoking user
+  --apply     Activate the dark Layan global theme and GTK theme for the invoking user
   --apply-light
-              Activate the Layan-light global theme for the invoking user
+              Activate the Layan-light global theme and GTK theme for the invoking user
   -h, --help  Show this help
 
 Examples:
@@ -51,6 +51,7 @@ KVANTUM_DIR="/usr/share/Kvantum"
 WALLPAPER_DIR="/usr/share/wallpapers"
 KONSOLE_DIR="/usr/share/konsole"
 ICONS_DIR="/usr/share/icons"
+GTK_THEMES_DIR="/usr/share/themes"
 
 # The user who ran sudo, if any. Per-user steps (cache rebuild, applying the
 # global theme) must run as them, not as root.
@@ -136,15 +137,56 @@ done
 echo "Installing Konsole color schemes and profiles..."
 cp -rf "${SRC_DIR}/konsole/"* "${KONSOLE_DIR}/"
 
+# The GTK themes import Breeze-GTK and only override its colors and corner shapes
+echo "Installing GTK themes (Layan and Layan-light)..."
+mkdir -p "${GTK_THEMES_DIR}"
+for gtk_src in "${SRC_DIR}/gtk/themes/"*; do
+  gtk_name=$(basename "${gtk_src}")
+  rm -rf "${GTK_THEMES_DIR:?}/${gtk_name}"
+  cp -rf "${gtk_src}" "${GTK_THEMES_DIR}/"
+done
+if [[ ! -d "${GTK_THEMES_DIR}/Breeze" || ! -d "${GTK_THEMES_DIR}/Breeze-Dark" ]]; then
+  echo "Warning: Breeze-GTK is not installed, so the Layan GTK themes have nothing to build on." >&2
+  echo "  Install the breeze-gtk package (Arch) or breeze-gtk-theme (Debian/Ubuntu/Fedora)." >&2
+fi
+
 if [[ -n "$TARGET_USER" ]] && command -v kbuildsycoca6 >/dev/null 2>&1; then
   run_as_target_user kbuildsycoca6 --noincremental >/dev/null 2>&1 || true
 fi
 
+# Select the Layan GTK theme for the invoking user. kde-gtk-config's daemon owns the GTK
+# settings files, so ask it to switch rather than editing them. libadwaita apps ignore the
+# theme name, so also import the Layan palette from the user's GTK 4 stylesheet.
+apply_gtk_theme() {
+  local gtk_theme=$1
+  local gtk4_dir="${TARGET_HOME}/.config/gtk-4.0"
+  local palette="${GTK_THEMES_DIR}/${gtk_theme}/gtk-4.0/libadwaita.css"
+
+  if command -v qdbus6 >/dev/null 2>&1 \
+    && run_as_target_user qdbus6 org.kde.kded6 /modules/gtkconfig org.kde.GtkConfig.setGtkTheme "${gtk_theme}" >/dev/null 2>&1; then
+    echo "Applied GTK theme for ${TARGET_USER}: ${gtk_theme}"
+  else
+    echo "Warning: could not set the GTK theme. Choose ${gtk_theme} under System Settings -> Application Style -> Configure GNOME/GTK Application Style." >&2
+  fi
+
+  run_as_target_user mkdir -p "${gtk4_dir}"
+  run_as_target_user touch "${gtk4_dir}/gtk.css"
+  # Drop the import of either Layan variant before adding the right one
+  run_as_target_user sed -i '\#/themes/Layan[^/]*/gtk-4.0/libadwaita.css#d' "${gtk4_dir}/gtk.css"
+  # kde-gtk-config writes this file without a trailing newline, so add one before appending
+  run_as_target_user sh -c '
+    if [ -s "$2" ] && [ -n "$(tail -c1 "$2")" ]; then echo >> "$2"; fi
+    printf "@import url(\"file://%s\");\n" "$1" >> "$2"
+  ' _ "${palette}" "${gtk4_dir}/gtk.css"
+}
+
 if [[ -n "$APPLY_THEME" ]]; then
   if [[ "$APPLY_THEME" == "light" ]]; then
     LOOKFEEL_ID=com.github.vinceliuice.Layan-light
+    GTK_THEME_ID=Layan-light
   else
     LOOKFEEL_ID=com.github.vinceliuice.Layan
+    GTK_THEME_ID=Layan
   fi
 
   if [[ -z "$TARGET_USER" ]]; then
@@ -154,6 +196,7 @@ if [[ -n "$APPLY_THEME" ]]; then
     echo "Warning: plasma-apply-lookandfeel not found; global theme was installed but not activated." >&2
   elif run_as_target_user plasma-apply-lookandfeel -a "${LOOKFEEL_ID}"; then
     echo "Applied global theme for ${TARGET_USER}: ${LOOKFEEL_ID}"
+    apply_gtk_theme "${GTK_THEME_ID}"
   else
     echo "Warning: could not apply the global theme. Activate it as your user with:" >&2
     echo "  plasma-apply-lookandfeel -a ${LOOKFEEL_ID}" >&2
@@ -168,6 +211,9 @@ echo "Cursors (System Settings -> Cursors -> layan-dark/light/darker-cursors):"
 echo "  ${ICONS_DIR}/layan-dark-cursors"
 echo "  ${ICONS_DIR}/layan-light-cursors"
 echo "  ${ICONS_DIR}/layan-darker-cursors"
+echo "GTK themes (System Settings -> Application Style -> Configure GNOME/GTK Application Style):"
+echo "  ${GTK_THEMES_DIR}/Layan"
+echo "  ${GTK_THEMES_DIR}/Layan-light"
 echo "Konsole (Settings -> Konsole -> Profiles -> Layan):"
 echo "  ${KONSOLE_DIR}/Layan.profile + Layan.colorscheme"
 echo "  ${KONSOLE_DIR}/LayanLight.profile + LayanLight.colorscheme"

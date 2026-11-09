@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Layan-light
+Comment=Layan light theme for GTK, matching the Layan Plasma theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Layan-light
+MetacityTheme=Layan-light
+IconTheme=Tela
+CursorTheme=layan-light-cursors

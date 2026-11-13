@@ -47,6 +47,9 @@ share the same colors.
   `~/.config/gtk-4.0/gtk.css` (`uninstall.sh` removes it again).
 - To pick a theme by hand, use System Settings -> Application Style -> Configure GNOME/GTK
   Application Style.
+- Chromium-based browsers (Brave, Chrome) draw their own title bar. With **Use GTK** selected in
+  the browser's Appearance settings, the GTK 3 themes style its minimize, maximize and close
+  buttons like the Layan Aurorae decoration (round dots, red close on hover).
 - GTK 2 is not themed.
 
 `gtk/generate.py` rebuilds the themes from the color schemes (python3 only).

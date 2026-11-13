@@ -5,8 +5,12 @@ The palette is read from color-schemes/Layan.colors and LayanLight.colors, so GT
 applications use the same colors as the Qt ones. Each theme contains:
 
   gtk-3.0/gtk.css         imports Breeze-GTK (breeze-gtk package), then overrides its named
-                          colors with the Layan palette and rounds windows, menus and tooltips
-  gtk-4.0/gtk.css         the same for GTK 4
+                          colors with the Layan palette and rounds windows, menus and tooltips.
+                          Also restyles what Chromium-based browsers draw in their own title bar:
+                          the window buttons like the Layan Aurorae decoration, and tab and
+                          toolbar colors that make the active tab stand out
+  gtk-3.0/assets/         glyphs for those window buttons
+  gtk-4.0/gtk.css         the same for GTK 4, without the window buttons
   gtk-4.0/libadwaita.css  the palette as libadwaita named colors. libadwaita apps ignore the
                           theme name, so install.sh imports this file from
                           ~/.config/gtk-4.0/gtk.css
@@ -311,6 +315,146 @@ tooltip.background {
 }
 """
 
+# Window buttons: the round dots of the Layan Aurorae decoration (aurorae/themes/Layan). A gray
+# dot at rest, a glyph on hover, red for close and the accent when pressed, darker when the
+# window is unfocused. Breeze-GTK paints Chromium's buttons with PNGs through selectors that
+# contain "window.background.chromium", so these use the same selectors to take over.
+BUTTON_GLYPHS = {
+    "close": '<path d="M5 5L11 11M11 5L5 11"/>',
+    "minimize": '<path d="M4.5 8H11.5"/>',
+    "maximize": '<rect x="4.5" y="4.5" width="7" height="7" rx="0.5"/>',
+    "maximized": '<rect x="4.5" y="6.5" width="5" height="5" rx="0.5"/>'
+    '<path d="M6.5 6.5V4.5H11.5V9.5H9.5"/>',
+}
+
+BUTTON_SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" '
+    'fill="none" stroke="#ffffff" stroke-width="1.3" stroke-linecap="round" '
+    'stroke-linejoin="round">{}</svg>\n'
+)
+
+
+def titlebuttons_gtk3(p):
+    # The dark and light Aurorae themes use the same colors, so both variants share them
+    prefix = "window.background.chromium"
+    dot = "rgba(178, 178, 178, 0.5)"
+    unfocused = "rgba(136, 136, 136, 0.5)"
+    pressed = css(p.accent)
+    out = []
+
+    def rule(selectors, body):
+        out.append(",\n".join(selectors) + " {\n" + body + "}\n")
+
+    def sel(name, state="", maximized=False):
+        win = prefix + (".maximized" if maximized else "")
+        base = f"button.titlebutton.{name}{state}"
+        return [f"{win} headerbar {base}", f"{win} .titlebar {base}"]
+
+    def image(glyph):
+        return "none" if glyph is None else f'url("assets/layan-{glyph}.svg")'
+
+    shape = (
+        "  color: transparent;\n"
+        "  border-image: none;\n"
+        "  border-color: transparent;\n"
+        "  border-radius: 50%;\n"
+        "  box-shadow: none;\n"
+        "  -gtk-icon-source: none;\n"
+        "  min-width: 16px;\n"
+        "  min-height: 16px;\n"
+        "  padding: 0;\n"
+        "  margin: 0 4px;\n"
+        "  background-repeat: no-repeat;\n"
+        "  background-position: center;\n"
+        "  background-size: 16px 16px;\n"
+    )
+
+    # name, glyph at rest, hover color, pressed color
+    for name, glyph, hover, press, maximized in (
+        ("close", "close", "#ff5555", pressed, False),
+        ("minimize", "minimize", dot, "rgba(179, 179, 179, 0.5)", False),
+        ("maximize", "maximize", dot, "rgba(179, 179, 179, 0.5)", False),
+        ("maximize", "maximized", dot, "rgba(179, 179, 179, 0.5)", True),
+    ):
+        rule(
+            sel(name, maximized=maximized),
+            f"{shape}  background-color: {dot};\n  background-image: none;\n",
+        )
+        rule(
+            sel(name, ":hover", maximized),
+            f"  background-color: {hover};\n  background-image: {image(glyph)};\n",
+        )
+        rule(
+            sel(name, ":active", maximized),
+            f"  background-color: {press};\n  background-image: {image(glyph)};\n",
+        )
+        rule(
+            sel(name, ":backdrop", maximized),
+            f"  background-color: {unfocused};\n  background-image: none;\n",
+        )
+    return "\n".join(out)
+
+
+def window_shadow_gtk3(p):
+    """Lighter shadow for regular windows than the Breeze default.
+
+    Breeze draws 0 0 16px at 50% plus 0 2px 8px at 30%, which is very heavy. Popups, tooltips and
+    message dialogs keep their own Breeze shadows, which are more specific than this selector.
+    """
+    blur, ring = ("0.22", "0.2") if p.dark else ("0.15", "0.12")
+    return (
+        "window.csd decoration {\n"
+        f"  box-shadow: 0 2px 8px rgba(0, 0, 0, {blur}), 0 0 0 1px rgba(0, 0, 0, {ring});\n"
+        "}\n"
+    )
+
+
+# Chromium rounds the top corners of its window from the titlebar node, but draws the shadow from
+# the decoration node, so both need the same radius or the shadow does not follow the window.
+# Chromium forces square bottom corners with its own application-level CSS, which a theme cannot
+# override, so only the top corners are rounded.
+CHROMIUM_SHAPE_GTK3 = """\
+window.background.chromium headerbar,
+window.background.chromium headerbar.titlebar,
+window.background.chromium .titlebar {
+  border-radius: 12px 12px 0 0;
+}
+
+window.background.chromium.maximized headerbar,
+window.background.chromium.maximized .titlebar,
+window.background.chromium.tiled headerbar,
+window.background.chromium.tiled .titlebar,
+window.background.chromium.fullscreen headerbar,
+window.background.chromium.fullscreen .titlebar {
+  border-radius: 0;
+}
+"""
+
+
+def chromium_tabs_gtk3(p):
+    """Make the active tab stand out in Chromium-based browsers.
+
+    Chromium takes the toolbar, infobars and the active tab from the window background, and the
+    tab strip behind them from the titlebar. Layan uses the same color for both, which leaves
+    the active tab invisible. In the dark theme the toolbar and tab get darker than the frame,
+    so the frame keeps the scheme's color. In the light theme the frame gets darker instead, so
+    the tab stays the lighter surface. Scoped to Chromium so other GTK windows are unchanged.
+    """
+    prefix = "window.background.chromium"
+    if p.dark:
+        return f"{prefix} {{\n  background-color: {css(mix(p.bg, BLACK, 0.3))};\n}}\n"
+
+    selectors = [f"{prefix} headerbar.titlebar", f"{prefix} .titlebar", f"{prefix} headerbar"]
+    out = []
+    for state, amount in (("", 0.12), (":backdrop", 0.1)):
+        color = css(mix(p.bg, BLACK, amount))
+        out.append(
+            ",\n".join(s + state for s in selectors)
+            + f" {{\n  background-color: {color};\n  background-image: none;\n}}\n"
+        )
+    return "\n".join(out)
+
+
 HEADER = "/* Generated by gtk/generate.py from color-schemes/{scheme}. Do not edit by hand. */\n"
 
 
@@ -342,10 +486,25 @@ CursorTheme={"layan-darker-cursors" if dark else "layan-light-cursors"}
 """,
     )
 
-    for ver, shape in (("3.0", SHAPE_GTK3), ("4.0", SHAPE_GTK4)):
+    shape3 = "\n".join(
+        (
+            SHAPE_GTK3,
+            window_shadow_gtk3(p),
+            CHROMIUM_SHAPE_GTK3,
+            chromium_tabs_gtk3(p),
+            titlebuttons_gtk3(p),
+        )
+    )
+    for ver, shape in (("3.0", shape3), ("4.0", SHAPE_GTK4)):
         write(
             os.path.join(out, f"gtk-{ver}", "gtk.css"),
             f'{head}@import url("../../{breeze}/gtk-{ver}/gtk.css");\n\n{palette}\n\n{shape}',
+        )
+
+    for glyph, shapes in BUTTON_GLYPHS.items():
+        write(
+            os.path.join(out, "gtk-3.0", "assets", f"layan-{glyph}.svg"),
+            BUTTON_SVG.format(shapes),
         )
 
     write(

@@ -8,7 +8,8 @@ applications use the same colors as the Qt ones. Each theme contains:
                           colors with the Layan palette and rounds windows, menus and tooltips.
                           Also restyles what Chromium-based browsers draw in their own title bar:
                           the window buttons like the Layan Aurorae decoration, and tab and
-                          toolbar colors that make the active tab stand out
+                          toolbar colors that make the active tab stand out. Their windows keep
+                          square corners
   gtk-3.0/assets/         glyphs for those window buttons
   gtk-4.0/gtk.css         the same for GTK 4, without the window buttons
   gtk-4.0/libadwaita.css  the palette as libadwaita named colors. libadwaita apps ignore the
@@ -409,23 +410,17 @@ def window_shadow_gtk3(p):
     )
 
 
-# Chromium rounds the top corners of its window from the titlebar node, but draws the shadow from
-# the decoration node, so both need the same radius or the shadow does not follow the window.
-# Chromium forces square bottom corners with its own application-level CSS, which a theme cannot
-# override, so only the top corners are rounded.
+# Chromium-based browsers get square corners. The window outline comes from the decoration node and
+# the title bar from the headerbar nodes, so all of them are flattened, and the shadow then follows
+# the square outline. These selectors are more specific than the generic window.csd rules above.
 CHROMIUM_SHAPE_GTK3 = """\
+window.background.chromium,
+window.background.chromium decoration,
+window.csd.chromium,
+window.csd.chromium decoration,
 window.background.chromium headerbar,
 window.background.chromium headerbar.titlebar,
 window.background.chromium .titlebar {
-  border-radius: 12px 12px 0 0;
-}
-
-window.background.chromium.maximized headerbar,
-window.background.chromium.maximized .titlebar,
-window.background.chromium.tiled headerbar,
-window.background.chromium.tiled .titlebar,
-window.background.chromium.fullscreen headerbar,
-window.background.chromium.fullscreen .titlebar {
   border-radius: 0;
 }
 """

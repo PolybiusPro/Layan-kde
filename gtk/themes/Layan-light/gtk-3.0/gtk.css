@@ -117,18 +117,13 @@ window.csd decoration {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
+window.background.chromium,
+window.background.chromium decoration,
+window.csd.chromium,
+window.csd.chromium decoration,
 window.background.chromium headerbar,
 window.background.chromium headerbar.titlebar,
 window.background.chromium .titlebar {
-  border-radius: 12px 12px 0 0;
-}
-
-window.background.chromium.maximized headerbar,
-window.background.chromium.maximized .titlebar,
-window.background.chromium.tiled headerbar,
-window.background.chromium.tiled .titlebar,
-window.background.chromium.fullscreen headerbar,
-window.background.chromium.fullscreen .titlebar {
   border-radius: 0;
 }
 

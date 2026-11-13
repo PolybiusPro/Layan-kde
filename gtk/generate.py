@@ -8,8 +8,8 @@ applications use the same colors as the Qt ones. Each theme contains:
                           colors with the Layan palette and rounds windows, menus and tooltips.
                           Also restyles what Chromium-based browsers draw in their own title bar:
                           the window buttons like the Layan Aurorae decoration, and tab and
-                          toolbar colors that make the active tab stand out. Their windows keep
-                          square corners
+                          toolbar colors that make the active tab stand out. Their windows have
+                          9px corners
   gtk-3.0/assets/         glyphs for those window buttons
   gtk-4.0/gtk.css         the same for GTK 4, without the window buttons
   gtk-4.0/libadwaita.css  the palette as libadwaita named colors. libadwaita apps ignore the
@@ -410,17 +410,37 @@ def window_shadow_gtk3(p):
     )
 
 
-# Chromium-based browsers get square corners. The window outline comes from the decoration node and
-# the title bar from the headerbar nodes, so all of them are flattened, and the shadow then follows
-# the square outline. These selectors are more specific than the generic window.csd rules above.
+# Chromium-based browsers get 9px corners. The window outline comes from the decoration node and
+# the title bar from the headerbar nodes, so the window and decoration are rounded on every corner
+# and the title bar only on top, where it sits against the window edge. These selectors are more
+# specific than the generic window.csd rules above. Chromium forces square bottom corners with its
+# own application-level CSS, which a theme cannot override.
 CHROMIUM_SHAPE_GTK3 = """\
 window.background.chromium,
 window.background.chromium decoration,
 window.csd.chromium,
-window.csd.chromium decoration,
+window.csd.chromium decoration {
+  border-radius: 9px;
+}
+
 window.background.chromium headerbar,
 window.background.chromium headerbar.titlebar,
 window.background.chromium .titlebar {
+  border-radius: 9px 9px 0 0;
+}
+
+window.background.chromium.maximized,
+window.background.chromium.maximized decoration,
+window.background.chromium.maximized headerbar,
+window.background.chromium.maximized .titlebar,
+window.background.chromium.tiled,
+window.background.chromium.tiled decoration,
+window.background.chromium.tiled headerbar,
+window.background.chromium.tiled .titlebar,
+window.background.chromium.fullscreen,
+window.background.chromium.fullscreen decoration,
+window.background.chromium.fullscreen headerbar,
+window.background.chromium.fullscreen .titlebar {
   border-radius: 0;
 }
 """

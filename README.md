@@ -50,7 +50,7 @@ share the same colors.
 - Chromium-based browsers (Brave, Chrome) draw their own title bar. With **Use GTK** selected in
   the browser's Appearance settings, the GTK 3 themes style its minimize, maximize and close
   buttons like the Layan Aurorae decoration (round dots, red close on hover). The browser window
-  itself has square corners.
+  itself has 9px corners.
 - GTK 2 is not themed.
 
 `gtk/generate.py` rebuilds the themes from the color schemes (python3 only).

@@ -120,10 +120,28 @@ window.csd decoration {
 window.background.chromium,
 window.background.chromium decoration,
 window.csd.chromium,
-window.csd.chromium decoration,
+window.csd.chromium decoration {
+  border-radius: 9px;
+}
+
 window.background.chromium headerbar,
 window.background.chromium headerbar.titlebar,
 window.background.chromium .titlebar {
+  border-radius: 9px 9px 0 0;
+}
+
+window.background.chromium.maximized,
+window.background.chromium.maximized decoration,
+window.background.chromium.maximized headerbar,
+window.background.chromium.maximized .titlebar,
+window.background.chromium.tiled,
+window.background.chromium.tiled decoration,
+window.background.chromium.tiled headerbar,
+window.background.chromium.tiled .titlebar,
+window.background.chromium.fullscreen,
+window.background.chromium.fullscreen decoration,
+window.background.chromium.fullscreen headerbar,
+window.background.chromium.fullscreen .titlebar {
   border-radius: 0;
 }
 

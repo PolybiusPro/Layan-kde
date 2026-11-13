@@ -194,7 +194,7 @@
          y="288.55554"
          width="50"
          height="9.4444447"
-         style="opacity:0.5;fill:url(#linearGradient1912);stroke-width:0.9718253" />
+         style="opacity:0.25;fill:url(#linearGradient1912);stroke-width:0.9718253" />
       <rect
          id="rect33-2"
          transform="translate(3,2)"
@@ -222,7 +222,7 @@
          y="288"
          width="50"
          height="10"
-         style="opacity:0.5;fill:url(#linearGradient913)" />
+         style="opacity:0.25;fill:url(#linearGradient913)" />
       <rect
          id="rect41-2"
          transform="translate(3,2)"
@@ -250,7 +250,7 @@
          y="289"
          width="50"
          height="10"
-         style="opacity:0.5;fill:url(#linearGradient1951)" />
+         style="opacity:0.25;fill:url(#linearGradient1951)" />
       <rect
          id="rect53-2"
          transform="translate(3,2)"
@@ -274,7 +274,7 @@
      id="decoration-topleft"
      transform="matrix(1.0588225,0,0,1.0588225,12,27.00002)">
     <path
-       style="opacity:0.5;fill:url(#radialGradient1910);stroke-width:1.05882251"
+       style="opacity:0.25;fill:url(#radialGradient1910);stroke-width:1.05882251"
        d="m 17,152 v 18 h 10 c 0,-4.432 3.568,-8 8,-8 v -10 z"
        transform="matrix(0.94444536,0,0,0.94444536,-16.055571,-143.55571)"
        id="shadow-topleft-7"
@@ -298,7 +298,7 @@
        id="path928"
        transform="matrix(0.94444536,0,0,0.94444536,-16.055571,-143.55571)"
        d="m 17,152 v 18 h 10 c 0,-4.432 3.568,-8 8,-8 v -10 z"
-       style="opacity:0.5;fill:url(#radialGradient1908);stroke-width:1.05882251"
+       style="opacity:0.25;fill:url(#radialGradient1908);stroke-width:1.05882251"
        inkscape:connector-curvature="0" />
     <path
        id="path930"
